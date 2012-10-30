@@ -67,12 +67,16 @@ BUGS/TODO
 * conditionally asset compilation is disabled for now
 * create a better default nginx config
 * enable monit automatically
-* do not deploy stuff as root (this hasn't the highest priority for me as I'm always deploying to virtual servers)
 * automatically fix postgre' pg_hba.conf
 * automatically create new database role
 * unicorn restart script should check if unicorn is actually running, if not start unicorn app server
 * when restarting first minimize app worker count to make continuous deployment on low-memory hosts possible
 * automatically configure postgres backup script
+
+WIP
+---
+
+* do not deploy stuff as root (this hasn't the highest priority for me as I'm always deploying to virtual servers) (user-separation branch)
 
 HINT
 ----
