@@ -1,0 +1,50 @@
+worker_processes <%= unicorn_workers %>
+working_directory "<%= current_path %>"
+# TODO: why?
+user '<%= user %>', '<%= user %>'
+preload_app true
+timeout 30
+listen "<%= current_path %>/tmp/sockets/unicorn.sock"
+pid "<%= current_path %>/tmp/pids/unicorn.pid"
+
+# Set the path of the log files inside the log folder of the testapp
+stderr_path "<%= unicorn_log %>.stderr"
+stdout_path "<%= unicorn_log %>.stdout"
+
+# TODO (2012/4/2): verify: do I still need this?
+before_fork do |server, worker|
+  if defined? ActiveRecord::Base
+    ActiveRecord::Base.connection.disconnect!
+  end
+
+  ##
+  # When sent a USR2, Unicorn will suffix its pidfile with .oldbin and
+  # immediately start loading up a new version of itself (loaded with a new
+  # version of our app). When this new Unicorn is completely loaded
+  # it will begin spawning workers. The first worker spawned will check to
+  # see if an .oldbin pidfile exists. If so, this means we've just booted up
+  # a new Unicorn and need to tell the old one that it can now die. To do so
+  # we send it a QUIT.
+  #
+  # Using this method we get 0 downtime deploys.
+  #
+  # copied this from github's setup
+
+  old_pid = Rails.root.to_s + '/tmp/pids/unicorn.pid.oldbin'
+  if File.exists?(old_pid) && server.pid != old_pid
+    begin
+      Process.kill("QUIT", File.read(old_pid).to_i)
+    rescue Errno::ENOENT, Errno::ESRCH
+      # someone else did our job for us
+    end
+  end
+end
+
+after_fork do |server, worker|
+  if defined?(ActiveRecord::Base)
+    ActiveRecord::Base.establish_connection
+  end
+  
+  child_pid = server.config[:pid].sub(".pid", ".#{worker.nr}.pid")
+  system("echo #{Process.pid} > #{child_pid}")
+end
