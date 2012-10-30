@@ -27,11 +27,6 @@ configuration.load do
   default_run_options[:pty] = true
   ssh_options[:forward_agent] = true
 
-  set :stages, %w(production staging)
-  set :default_stage, 'staging'
-
-  require 'capistrano/ext/multistage'
-  
   set :scm, :git
   set :scm_verbose, false
   set :git_enable_submodules, 1
