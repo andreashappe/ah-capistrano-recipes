@@ -1,4 +1,5 @@
-= ah-capistrano-recipes
+ah-capistrano-recipes
+=====================
 
 This gem holds some common capistrano recipes that I'm using to deploy rails to virtual debian servers.
 
@@ -11,7 +12,8 @@ The automatically installed and configured tool-chain includes
 * unicorn
 * monit (with configuration multi-worker monitoring)
 
-== Howto use this
+Howto use this
+--------------
 
 capify your project and include the gem. Fix your config/deploy.rb to look something like this:
 
@@ -36,7 +38,8 @@ capify your project and include the gem. Fix your config/deploy.rb to look somet
 
 	set :stages, %w(production staging my-custom-provider-setup)
 
-== HOWTO SETUP A NEW SERVER
+HOWTO SETUP A NEW SERVER
+------------------------
 
 	$ ssh-copy-id root@new-server
 	$ create a config/deploy/new-server.rb
@@ -45,14 +48,17 @@ capify your project and include the gem. Fix your config/deploy.rb to look somet
 
 Note: monit has to be configured by hand. Also postgres' access rights must be configured manually.
 
-== HOWTO SETUP A NEW APPLICATION
+HOWTO SETUP A NEW APPLICATION
+-----------------------------
 
 	$ cap new-server deploy:setp
 	# copy database and assets manually
 	$ cap new-server deploy
 
-== BUGS/TODO
+BUGS/TODO
+---------
 
+* generator for example config/deploy.rb
 * database creation script is kinda shaky (it cannot destroy stuff, but I'm not sure that it will work in too many cases)
 * automatic database backup is disabled for now
 * automatic database backup before migrations is disabled for now
