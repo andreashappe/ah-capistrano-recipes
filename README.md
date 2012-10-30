@@ -19,6 +19,10 @@ capify your project and include the gem. Fix your config/deploy.rb to look somet
 
 	require "bundler/capistrano"
 
+	set :stages, %w(production staging my-custom-provider-setup)
+        set :default_stage, "staging"
+	require 'capistrano/ext/multistage'
+        
 	require 'recipes/common'
 	require 'recipes/base_setup'
 	require "recipes/nginx"
@@ -35,8 +39,6 @@ capify your project and include the gem. Fix your config/deploy.rb to look somet
 	set :deploy_to, "/media/raid/managed-apps/#{application}/"
 	set :domain_aliases, "some-domain-alias-1.com some-domain-alias-2.com"
 	set :enable_ssl, false
-
-	set :stages, %w(production staging my-custom-provider-setup)
 
 HOWTO SETUP A NEW SERVER
 ------------------------
@@ -72,11 +74,16 @@ BUGS/TODO
 * when restarting first minimize app worker count to make continuous deployment on low-memory hosts possible
 * automatically configure postgres backup script
 
-== HINT
+HINT
+----
+* If you get some "namespace not found" error please use
 
-If you have installed a postgres database and need to change the owner of all tables use the following script:
+	bundle exec cap ...
+
+* If you have installed a postgres database and need to change the owner of all tables use the following script:
 
 	for tbl in `psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" $DATABASE` ; do  psql -c "alter table $tbl owner to $NEW_OWNER" $DATABASE ; done
 
-== Copyright
+Copyright
+---------
 Copyright (c) 2012 Andreas Happe, See LICENSE for details
