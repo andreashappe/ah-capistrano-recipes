@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -x
+set -e
+
+$DATABASE = $1
+$USER = $2
+
+for tbl in `psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" $DATABASE` ; do
+  psql -c "alter table $tbl owner to $NEW_OWNER" $DATABASE ;
+done

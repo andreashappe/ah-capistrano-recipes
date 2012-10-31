@@ -57,18 +57,22 @@ HOWTO SETUP A NEW APPLICATION
 	# copy database and assets manually
 	$ cap new-server deploy
 
+## NOTES
+
+### Database
+
+* the system tries to automatically detect network or host based setups and creates user and databases
+* there's a rake tast "postgres:fix_permissions" which grants all ownership and permissions on a given database to a user. The same script can be called through /usr/local/bin/grant_access_to_db database user
+
+
 BUGS/TODO
 ---------
 
 * generator for example config/deploy.rb
-* database creation script is kinda shaky (it cannot destroy stuff, but I'm not sure that it will work in too many cases)
-* automatic database backup is disabled for now
-* automatic database backup before migrations is disabled for now
 * conditionally asset compilation is disabled for now
 * create a better default nginx config
 * enable monit automatically
 * automatically fix postgre' pg_hba.conf
-* automatically create new database role
 * unicorn restart script should check if unicorn is actually running, if not start unicorn app server
 * when restarting first minimize app worker count to make continuous deployment on low-memory hosts possible
 * automatically configure postgres backup script
@@ -77,16 +81,13 @@ WIP
 ---
 
 * do not deploy stuff as root (this hasn't the highest priority for me as I'm always deploying to virtual servers) (user-separation branch)
+* provide support for creating database users and tables (database branch)
 
 HINT
 ----
 * If you get some "namespace not found" error please use
 
 	bundle exec cap ...
-
-* If you have installed a postgres database and need to change the owner of all tables use the following script:
-
-	for tbl in `psql -qAt -c "select tablename from pg_tables where schemaname = 'public';" $DATABASE` ; do  psql -c "alter table $tbl owner to $NEW_OWNER" $DATABASE ; done
 
 Copyright
 ---------

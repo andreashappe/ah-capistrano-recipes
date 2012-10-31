@@ -1,28 +1,47 @@
 Capistrano::Configuration.instance(:must_exist).load do
   namespace :postgres do
+
+    # TODO: should be run as root
     task :install, roles: :db do
-      run "#{sudo} add-apt-repository ppa:pitti/postgresql"
-      run "#{sudo} apt-get -y update"
-      run "#{sudo} apt-get -y install postgresql libpq-dev"
+      run "add-apt-repository ppa:pitti/postgresql"
+      run "apt-get -y update"
+      run "apt-get -y install postgresql libpq-dev"
+      generate_from_template "postgresql/grant_access_to_db", "/usr/local/bin/grant_access_to_db"
+      generate_from_template "postgresql/add_db_access_to_user", "/etc/sudoers.d/add_db_access_to_#{user}"
     end
     after "deploy:install", "postgres:install"
 
-    task :create_database, :roles => [:db] do
-      # read database config
+    # read database config
+    def get_db_config
       config = YAML.load_file("config/database.yml")
-      adapter = config[stage.to_s]["adapter"]
-      hostname = config[stage.to_s]["host"]
-      username = config[stage.to_s]["username"]
-      password = config[stage.to_s]["password"]
-      database = config[stage.to_s]["database"]
-    
-      if adapter == "postgresql"
-        # create database-user
-        #run %Q{#{sudo} -u postgres psql -c "create user #{username} with password '#{password}';"}
-        #run %Q{#{sudo} -u postgres psql -c "create database #{database};"} # owner #{username};"}
+
+      if config[stage.to_s]["adapter"] != "postgresql"
+        raise "cannot configure database as it is not using postgres adapter"
+      end
+
+      return config[stage.to_s]
+    end
+
+    # if host+username+password was supplied assume that we have a network setup
+    # where we need to connect to a TCP server. Otherwise try local Unix Domain
+    # Socket connectivity with local user
+    def is_network_setup?(config)
+      config.include?("host") && config.include?("username") && config.include?("password")
+    end
+
+    task :create_database, :roles => [:db] do
+      config = get_db_config()
+      username = config["username"]
+      password = config["password"]
+
+      if is_network_setup?(config)
+        # asume network based setup
+        run %Q{#{sudo} -u postgres psql -h #{config["host"]} -c "create user #{username} with password '#{password}';"}
+        run %Q{#{sudo} -u postgres psql -h #{config["host"]} -c "create database #{database} owner #{username};"}
       else
-        puts "cannot configure the database as it isn't ain't postgresql"
-        exit
+        # asume udp based setup
+        run "#{sudo} -u postgres createuser #{username}"
+        run "#{sudo} -u postgres createdb #{database}"
       end
 
       run "#{sudo} mkdir -p #{shared_path}/db_backups" 
@@ -32,21 +51,18 @@ Capistrano::Configuration.instance(:must_exist).load do
 
     desc "Dumps target database db into an file"
     task :backup_database do
-      # read database config
-      config = YAML.load_file("config/database.yml")
-      adapter = config[stage.to_s]["adapter"]
-      hostname = config[stage.to_s]["host"]
-      username = config[stage.to_s]["username"]
-      password = config[stage.to_s]["password"]
-      database = config[stage.to_s]["database"]
-    
-      if adapter == "postgresql" && hostname == "localhost"
-        run %Q{#{sudo} -u postgres pg_dump #{database} -f #{shared_path}/db_backups/dump-#{Time.now.strftime("%Y%m%d-%H%M")}.sql}
+      config = get_db_config()
+      output_file = "#{shared_path}/db_backups/dump-#{Time.now.strftime("%Y%m%d-%H%M")}.sql"
+
+      if is_network_setup?(config)
+        # asume network/tcp setup
+        # TODO: can I automatically supply the password somehow?
+        run "#{sudo} -u postgres pg_dump #{config["database"]} -f #{output_file} -h #{config["host"]} -U #{config["username"]}"
       else
-        puts "cannot dump the database as it isn't localhost or driver ain't postgresql"
-        exit
+        # asume local udp setup
+        run "#{sudo} -u postgres pg_dump #{config["database"]} -f #{output_file}"
       end
     end
-    #before 'deploy:migrate', 'postgres:backup_database'
+    before 'deploy:migrate', 'postgres:backup_database'
   end
 end
