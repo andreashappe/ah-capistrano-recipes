@@ -61,14 +61,10 @@ BUGS/TODO
 ---------
 
 * generator for example config/deploy.rb
-* database creation script is kinda shaky (it cannot destroy stuff, but I'm not sure that it will work in too many cases)
-* automatic database backup is disabled for now
-* automatic database backup before migrations is disabled for now
 * conditionally asset compilation is disabled for now
 * create a better default nginx config
 * enable monit automatically
 * automatically fix postgre' pg_hba.conf
-* automatically create new database role
 * unicorn restart script should check if unicorn is actually running, if not start unicorn app server
 * when restarting first minimize app worker count to make continuous deployment on low-memory hosts possible
 * automatically configure postgres backup script
@@ -77,6 +73,10 @@ WIP
 ---
 
 * do not deploy stuff as root (this hasn't the highest priority for me as I'm always deploying to virtual servers) (user-separation branch)
+* database creation script is kinda shaky (it cannot destroy stuff, but I'm not sure that it will work in too many cases) (database branch)
+* automatic database backup is disabled for now (database branch)
+* automatic database backup before migrations is disabled for now (database branch)
+* automatically create new database role (database branch)
 
 HINT
 ----
