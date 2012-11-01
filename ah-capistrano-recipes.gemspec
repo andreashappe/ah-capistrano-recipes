@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = ["README.md"]
 
   s.add_dependency "capistrano"
+  s.add_dependency "capistrano-ext"
 end
