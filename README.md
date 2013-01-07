@@ -43,19 +43,20 @@ capify your project and include the gem. Fix your config/deploy.rb to look somet
 HOWTO SETUP A NEW SERVER
 ------------------------
 
+        # check if there are already installed packages (apache, courier) and uninstall them
 	$ ssh-copy-id root@new-server
 	$ create a config/deploy/new-server.rb
-	$ cap new-server base_setup:prepare_root_stuff
-	$ cap new-server deploy:install
+	$ bundle exec cap new-server base_setup:prepare_root_stuff
+	$ bundle exec cap new-server deploy:install
 
 Note: monit has to be configured by hand. Also postgres' access rights must be configured manually.
 
 HOWTO SETUP A NEW APPLICATION
 -----------------------------
 
-	$ cap new-server deploy:setp
+	$ bundle exec cap new-server deploy:setp
 	# copy database and assets manually
-	$ cap new-server deploy
+	$ bundle exec cap new-server deploy
 
 BUGS/TODO
 ---------
