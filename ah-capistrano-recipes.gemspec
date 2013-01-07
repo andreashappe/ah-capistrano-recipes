@@ -1,5 +1,3 @@
-require 'capistrano'
-
 Gem::Specification.new do |s|
   s.name        = 'ah-capistrano-recipes'
   s.version     = '0.0.1'
