@@ -2,8 +2,8 @@ Capistrano::Configuration.instance(:must_exist).load do
   namespace :rbenv do
     task :install_ruby do
       # TODO: make version configurable
-      run "rbenv install 1.9.3-p286"
-      run "rbenv global 1.9.3-p286"
+      run "rbenv install 1.9.3-p545"
+      run "rbenv global 1.9.3-p545"
       run "gem install bundler"
       run "rbenv rehash"
     end
